@@ -1,21 +1,30 @@
-function handleState(tab, state) {
+async function handleState(tab, state) {
     if (state === "ON") {
         chrome.scripting.insertCSS({
             target: { tabId: tab.id },
-            files: ["historyTab.css"]
-        });
-        chrome.scripting.executeScript({
-            target: { tabId: tab.id },
-            files: ["content.js"]
+            files: ["../../css/content.css"]
         });
     } else if (state === "OFF") {
         chrome.scripting.removeCSS({
             target: { tabId: tab.id },
-            files: ["historyTab.css"]
+            files: ["../../css/content.css"]
         });
     } else {
         console.error(`Incorrect state: ${state}`);
+        return;
     }
+
+    // set badge text
+    await chrome.action.setBadgeText({
+        tabId: tab.id,
+        text: nextState,
+    });
+
+    // send message to content script
+    chrome.tabs.sendMessage({
+        tabId: tab.id,
+        message: state,
+    });
 }
 
 function prepareBadge() {
@@ -37,12 +46,7 @@ function prepareBadge() {
 
         const prevState = await chrome.action.getBadgeText({ tabId: tab.id });
         const nextState = (prevState === "ON") ? "OFF" : "ON";
-        await chrome.action.setBadgeText({
-            tabId: tab.id,
-            text: nextState,
-        });
-
-        handleState(tab, nextState);
+        await handleState(tab, nextState);
     });
 }
 

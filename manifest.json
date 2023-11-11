@@ -4,21 +4,22 @@
     "description": "Converts prices from yen to euro in the listing page.",
     "version": "1.0",
     "icons": {
-        "256": "images/hva.png"
+        "256": "./images/hva.png"
     },
     "action": {
         "default_icon": {
-            "256": "images/hva.png"
+            "256": "./images/hva.png"
         },
         "default_title": "AmiAmi Quick Price Convert"
     },
     "background": {
-        "service_worker": "background.js"
+        "service_worker": "./js/services/background.js"
     },
     "permissions": [
         "activeTab",
         "tabs",
-        "scripting"
+        "scripting",
+        "storage"
     ],
     "host_permissions": [
         "*://*.amiami.com/*"
@@ -37,8 +38,10 @@
                 "*://*.amiami.com/*"
             ],
             "js": [
-                "content.js"
-            ]
+                "./js/content/content.js"
+            ],
+            "all_frames": false,
+            "run_at": "document_start"
         }
     ]
 }

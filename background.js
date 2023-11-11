@@ -1,6 +1,6 @@
 function handleState(tab, state) {
     if (state === "ON") {
-        chrome.tabs.insertCSS({
+        chrome.scripting.insertCSS({
             target: { tabId: tab.id },
             files: ["historyTab.css"]
         });
@@ -9,7 +9,7 @@ function handleState(tab, state) {
             files: ["content.js"]
         });
     } else if (state === "OFF") {
-        chrome.tabs.removeCSS({
+        chrome.scripting.removeCSS({
             target: { tabId: tab.id },
             files: ["historyTab.css"]
         });

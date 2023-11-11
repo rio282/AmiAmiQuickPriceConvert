@@ -32,15 +32,20 @@ function doPriceConversion() {
 }
 
 function addHistoryTab() {
-    //
-    const pageTop = document.querySelector("#pagetop");
+    if (document.querySelector("#historyTab")) {
+        return;
+    }
 
-    // add history to page
+    const topOfPage = document.querySelector(".body");
+
+    // add history to top of page
     const historyTab = document.createElement("div");
+    historyTab.id = "historyTab";
     historyTab.classList.add("historyTab");
-    pageTop.append(historyTab);
+    topOfPage.prepend(historyTab);
 
     // create event listeners for each visited item OR read from history
+    // TODO
 }
 
 function main() {

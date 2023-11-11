@@ -28,39 +28,30 @@ class ContentManager {
         this.#currencyTable = currencyTable;
     }
 
-    doPriceConversion(undo = false) {
+    doPriceConversion(toCurrency = "eur") {
         const priceTagClass = "newly-added-items__item__price";
-        const priceCurrencyTagClass = "newly-added-items__item__price_state_currency";
+        const currencyTagClass = "newly-added-items__item__price_state_currency";
 
-        if (!undo) {
-            const priceElements = document.querySelectorAll(`.${priceTagClass}`);
-            for (let priceElement of priceElements) {
-                // calculate new price
-                const toCurrency = "eur";
-                const fromCurrency = priceElement.querySelector(`.${priceCurrencyTagClass}`).innerHTML.toLowerCase();
-                const originalPrice = parseFloat(priceElement.innerHTML.split("\n")[0].trim().replaceAll(",", ""));
-                const convertedPrice = (originalPrice * this.#currencyTable[`${fromCurrency}-${toCurrency}`]).toFixed(2);
-
-                // create new price element
-                let newPriceElement = document.createElement("p");
-                newPriceElement.classList.add(priceTagClass);
-
-                // create currency tag
-                let currencyTag = document.createElement("span");
-                currencyTag.classList.add(priceCurrencyTagClass);
-                currencyTag.innerHTML = toCurrency.toUpperCase();
-
-                // replace content of newPriceElement
-                newPriceElement.innerHTML = `${convertedPrice}\n`;
-                newPriceElement.appendChild(currencyTag);
-
-                // add new element into text div and hide the old one
-                priceElement.parentNode.appendChild(newPriceElement);
-                priceElement.classList.add("hidden");
+        const priceElements = document.querySelectorAll(`.${priceTagClass}`);
+        for (let priceElement of priceElements) {
+            // check if already converted
+            const fromCurrency = priceElement.querySelector(`.${currencyTagClass}`).innerHTML.toLowerCase();
+            if (fromCurrency === toCurrency) {
+                break;
             }
-        } else {
-            // TODO
-            return;
+
+            // calculate new price
+            const originalPrice = parseFloat(priceElement.innerHTML.split("\n")[0].trim().replaceAll(",", ""));
+            const convertedPrice = (originalPrice * this.#currencyTable[`${fromCurrency}-${toCurrency}`]).toFixed(2);
+
+            // create currency tag
+            let currencyTag = document.createElement("span");
+            currencyTag.classList.add(currencyTagClass);
+            currencyTag.innerHTML = toCurrency.toUpperCase();
+
+            // replace content of newPriceElement
+            priceElement.innerHTML = `${convertedPrice}\n`;
+            priceElement.appendChild(currencyTag);
         }
     }
 
@@ -88,7 +79,7 @@ async function run(on = true) {
     const dailyConversionTable = await currency.collectConversionTable();
 
     const manager = new ContentManager(dailyConversionTable);
-    manager.doPriceConversion(on);
+    manager.doPriceConversion("eur");
     manager.displayHistoryTab(on);
 }
 

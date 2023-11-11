@@ -65,16 +65,19 @@ class ContentManager {
     }
 
     displayHistoryTab(show = true) {
+        const id = "historyTab";
+
         if (show) {
             // add history to top of page
             const historyTab = document.createElement("div");
-            historyTab.id = "historyTab";
+            historyTab.id = id;
             historyTab.classList.add("historyTab");
 
             const topOfPage = document.querySelector(".body");
             topOfPage.prepend(historyTab);
         } else {
-
+            const historyTab = document.getElementById(id);
+            historyTab.remove();
         }
     }
 }
@@ -87,15 +90,10 @@ async function run(on = true) {
     const manager = new ContentManager(dailyConversionTable);
     manager.doPriceConversion(on);
     manager.displayHistoryTab(on);
-
-    console.log(`Set AmiAmiQuickPriceConvert to: '${new String(on).toUpperCase()}'`);
 }
 
 function init() {
-    chrome.runtime.onMessage.addListener(
-        
-    );
-
+    chrome.runtime.onMessage.addListener(async (message, sender) => await run(message === "ON"));
     console.log("Initialized content script!")
 }
 

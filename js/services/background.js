@@ -2,12 +2,12 @@ async function handleState(tab, state) {
     if (state === "ON") {
         chrome.scripting.insertCSS({
             target: { tabId: tab.id },
-            files: ["../../css/content.css"]
+            files: ["./css/content.css"]
         });
     } else if (state === "OFF") {
         chrome.scripting.removeCSS({
             target: { tabId: tab.id },
-            files: ["../../css/content.css"]
+            files: ["./css/content.css"]
         });
     } else {
         console.error(`Incorrect state: ${state}`);
@@ -17,14 +17,11 @@ async function handleState(tab, state) {
     // set badge text
     await chrome.action.setBadgeText({
         tabId: tab.id,
-        text: nextState,
+        text: state,
     });
 
     // send message to content script
-    chrome.tabs.sendMessage({
-        tabId: tab.id,
-        message: state,
-    });
+    chrome.tabs.sendMessage(tab.id, state);
 }
 
 function prepareBadge() {

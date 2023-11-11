@@ -1,0 +1,44 @@
+{
+    "manifest_version": 3,
+    "name": "AmiAmi Quick Price Convert",
+    "description": "Converts prices from yen to euro in the listing page.",
+    "version": "1.0",
+    "icons": {
+        "256": "images/hva.png"
+    },
+    "action": {
+        "default_icon": {
+            "256": "images/hva.png"
+        },
+        "default_title": "AmiAmi Quick Price Convert"
+    },
+    "background": {
+        "service_worker": "background.js"
+    },
+    "permissions": [
+        "activeTab",
+        "tabs",
+        "scripting"
+    ],
+    "host_permissions": [
+        "*://*.amiami.com/*"
+    ],
+    "commands": {
+        "_execute_action": {
+            "suggested_key": {
+                "default": "Ctrl+B",
+                "mac": "Command+B"
+            }
+        }
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "*://*.amiami.com/*"
+            ],
+            "js": [
+                "content.js"
+            ]
+        }
+    ]
+}

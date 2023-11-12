@@ -28,6 +28,23 @@ class ContentManager {
         this.#currencyTable = currencyTable;
     }
 
+    #addItemsInto(master, items = []) {
+        for (const item of items) {
+            const strippedTitle = `${item.thumb_title.substring(0, 50)}...`;
+            const itemLink = `https://www.amiami.com/eng/detail/?scode=${item.key}`;
+            const itemTemplate = `
+                <div class="card">
+                    <div>
+                        <p class="card-title">${strippedTitle}</p>
+                        <button type="button" role="button" onclick="window.open('${itemLink}', '_blank')">Open</button>
+                    </div>
+                    <img src="https://img.amiami.com/${item.thumb_url}" alt="${item.thumb_alt}" width="150">
+                </div>`;
+
+            master.innerHTML += itemTemplate;
+        }
+    }
+
     doPriceConversion(toCurrency = "eur") {
         const priceTagClass = "newly-added-items__item__price";
         const currencyTagClass = "newly-added-items__item__price_state_currency";
@@ -72,25 +89,11 @@ class ContentManager {
             const topOfPage = document.querySelector(".body");
             topOfPage.prepend(historyTab);
 
+            // filter logic
+            const filter = ["FIGURE", "GOODS"];
+            const items = Local.getItemsFromLocalStorage(filter);
             const roller = historyTab.querySelector("#roller");
-
-            // create cards with items in historyTab
-            const items = Local.getItemsFromLocalStorage();
-            for (const item of items) {
-                const strippedTitle = `${item.thumb_title.substring(0, 50)}...`;
-                const itemLink = `https://www.amiami.com/eng/detail/?scode=${item.key}`;
-                const itemTemplate = `
-                    <div class="card">
-                        <div>
-                            <p class="card-title">${strippedTitle}</p>
-                            <button type="button" role="button" onclick="window.open('${itemLink}', '_blank')">Open</button>
-                        </div>
-                        <img src="https://img.amiami.com/${item.thumb_url}" alt="${item.thumb_alt}" width="150">
-                        <hr class="vr">
-                    </div>`;
-
-                roller.innerHTML += itemTemplate;
-            }
+            this.#addItemsInto(roller, items);
         } else {
             const historyTab = document.getElementById(id);
             historyTab.remove();
@@ -99,8 +102,8 @@ class ContentManager {
 }
 // --------------------------------------------------------------------------------------------------------------------
 class Local {
-    static #getKeysFromLocalStorage() {
-        const allowedKeyTypes = ["FIGURE", "GOODS"];
+    static #getKeysFromLocalStorage(filter = []) {
+        const allowedKeyTypes = filter;
 
         let keys = [];
         for (let i = 0; i < localStorage.length; i++) {
@@ -116,10 +119,10 @@ class Local {
         return keys;
     }
 
-    static getItemsFromLocalStorage() {
+    static getItemsFromLocalStorage(filter = ["FIGURE", "GOODS"]) {
         let items = [];
 
-        const keys = this.#getKeysFromLocalStorage();
+        const keys = this.#getKeysFromLocalStorage(filter);
         for (const key of keys) {
             let item = JSON.parse(localStorage.getItem(key));
             item.key = key;

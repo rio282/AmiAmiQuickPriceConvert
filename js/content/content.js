@@ -22,6 +22,8 @@ class Currency {
 // --------------------------------------------------------------------------------------------------------------------
 class ContentManager {
 
+    #priceTagClass = "newly-added-items__item__price";
+    #currencyTagClass = "newly-added-items__item__price_state_currency";
     #currencyTable = {};
 
     constructor(currencyTable = {}) {
@@ -45,30 +47,45 @@ class ContentManager {
         }
     }
 
-    doPriceConversion(toCurrency = "eur") {
-        const priceTagClass = "newly-added-items__item__price";
-        const currencyTagClass = "newly-added-items__item__price_state_currency";
+    #changePriceOfElement(element, value, currency) {
+        // create currency tag
+        let currencyTag = document.createElement("span");
+        currencyTag.classList.add(this.#currencyTagClass);
+        currencyTag.innerHTML = currency.toUpperCase();
 
-        const priceElements = document.querySelectorAll(`.${priceTagClass}`);
-        for (let priceElement of priceElements) {
-            // check if already converted
-            const fromCurrency = priceElement.querySelector(`.${currencyTagClass}`).innerHTML.toLowerCase();
-            if (fromCurrency === toCurrency) {
-                break;
+        element.innerHTML = `${value}\n`;
+        element.appendChild(currencyTag);
+    }
+
+    doPriceConversion(toCurrency = "eur", revert = false) {
+        const priceElements = document.querySelectorAll(`.${this.#priceTagClass}`);
+
+        if (revert) {
+            for (let priceElement of priceElements) {
+                if (!priceElement.originalPrice || !priceElement.originalCurrency) {
+                    return;
+                }
+
+                this.#changePriceOfElement(priceElement, priceElement.originalPrice, priceElement.originalCurrency);
+                priceElement.originalPrice = "";
+                priceElement.originalCurrency = "";
             }
+        } else {
+            for (let priceElement of priceElements) {
+                // check if already converted
+                const fromCurrency = priceElement.querySelector(`.${this.#currencyTagClass}`).innerHTML.toLowerCase();
+                if (fromCurrency === toCurrency) {
+                    break;
+                }
 
-            // calculate new price
-            const originalPrice = parseFloat(priceElement.innerHTML.split("\n")[0].trim().replaceAll(",", ""));
-            const convertedPrice = (originalPrice * this.#currencyTable[`${fromCurrency}-${toCurrency}`]).toFixed(2);
+                // calculate new price
+                const originalPrice = parseFloat(priceElement.innerHTML.split("\n")[0].trim().replaceAll(",", ""));
+                const convertedPrice = (originalPrice * this.#currencyTable[`${fromCurrency}-${toCurrency}`]).toFixed(2);
 
-            // create currency tag
-            let currencyTag = document.createElement("span");
-            currencyTag.classList.add(currencyTagClass);
-            currencyTag.innerHTML = toCurrency.toUpperCase();
-
-            // replace content of newPriceElement
-            priceElement.innerHTML = `${convertedPrice}\n`;
-            priceElement.appendChild(currencyTag);
+                this.#changePriceOfElement(priceElement, convertedPrice, toCurrency);
+                priceElement.originalPrice = originalPrice;
+                priceElement.originalCurrency = fromCurrency;
+            }
         }
     }
 
@@ -140,7 +157,7 @@ async function run(on = true) {
     const dailyConversionTable = await currency.collectConversionTable();
 
     const manager = new ContentManager(dailyConversionTable);
-    manager.doPriceConversion("eur");
+    manager.doPriceConversion("eur", !on);
     manager.displayHistoryTab(on);
 }
 
